@@ -4,12 +4,21 @@
 #include <iomanip>
 #include <omp.h>
 
+// 3 constantes de precompilación
+#define N 100000        // usamos 100000 para probar performance
+#define chunk 1000      // tamaño de pedazos por hilo
+#define mostrar 10      // cantidad de datos a imprimir
+
+// prototipo de la función
+void imprimeArreglo(const int* arr);
+
 int main() {
-    int N = 100000;              // usamos 100000 para probar performance
     int requested_threads = 2;   // <-- HARD CODED: cambiar a 2, 4, 8 ,etc para distintas ejecuciones
 
     std::cout << "N (tamano del arreglo) = " << N << "\n";
     std::cout << "Hilos fijados: " << requested_threads << "\n";
+    std::cout << "chunk = " << chunk << "\n";
+    std::cout << "mostrar = " << mostrar << "\n";
 
     //Fija el número de hilos para OpenMP
     omp_set_num_threads(requested_threads);
@@ -36,12 +45,12 @@ int main() {
     int threads_used = 0;
     double t2 = omp_get_wtime();
 
-    #pragma omp parallel
+    #pragma omp parallel shared(A,B,R)
     {
         #pragma omp single
         threads_used = omp_get_num_threads();
 
-        #pragma omp for
+        #pragma omp for schedule(static, chunk)
         for (int i = 0; i < N; i++) {
             R[i] = A[i] + B[i];
         }
@@ -95,8 +104,21 @@ int main() {
                   << std::setw(3) << R[i] << "\n";
     }
 
+    // Impresión apoyada por la función imprimeArreglo
+    std::cout << "\nA (primeros " << mostrar << "): ";
+    imprimeArreglo(A.data());
+    std::cout << "B (primeros " << mostrar << "): ";
+    imprimeArreglo(B.data());
+    std::cout << "R (primeros " << mostrar << "): ";
+    imprimeArreglo(R.data());
+
     return 0;
 }
 
-
-
+// implementación de la función imprimeArreglo
+void imprimeArreglo(const int* arr) {
+    for (int i = 0; i < mostrar && i < N; i++) {
+        std::cout << arr[i] << (i < mostrar - 1 ? ", " : "");
+    }
+    std::cout << "\n";
+}
