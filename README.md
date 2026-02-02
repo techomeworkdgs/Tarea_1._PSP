@@ -14,3 +14,8 @@ La suma paralela se realiza con OpenMP usando un `parallel for`.
 cmake -S . -B build
 cmake --build build
 ./build/suma_arreglos
+
+## Compilar y ejecutar (línea de comandos)
+
+g++ -O2 -fopenmp src/threads.cpp -o suma_arreglos
+./suma_arreglos
